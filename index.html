@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Plataforma de Cursos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Plataforma de Cursos</h1>
+  </header>
+
+  <main class="curso-lista">
+    <!-- Cursos serão carregados aqui dinamicamente -->
+  </main>
+
+  <div id="load-message" style="text-align:center;margin:30px 0;color:#fff;">Carregando cursos...</div>
+
+  <script src="data/cursos.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.querySelector('.curso-lista');
+      const loadMessage = document.getElementById('load-message');
+
+      // Verifica se o arquivo data/cursos.js definiu a variável 'cursos'
+      if (typeof cursos === 'undefined' || !Array.isArray(cursos)) {
+        loadMessage.textContent = 'Erro: não foi possível carregar os cursos. Verifique se "data/cursos.js" está presente e define a variável "cursos".';
+        console.error('Variável "cursos" indefinida. Conteúdo de data/cursos.js ausente ou com erro.');
+        return;
+      }
+
+      loadMessage.style.display = 'none'; // esconde a mensagem de carregando
+
+      if (cursos.length === 0) {
+        container.innerHTML = '<p style="color:#fff;text-align:center">Nenhum curso disponível no momento.</p>';
+        return;
+      }
+
+      cursos.forEach((curso, index) => {
+        const card = document.createElement('div');
+        card.className = 'curso-card';
+        card.innerHTML = `
+          <h2>${curso.title || 'Curso sem título'}</h2>
+          <p>${curso.description || ''}</p>
+          <button data-id="${index}">Acessar Curso</button>
+        `;
+        container.appendChild(card);
+      });
+
+      // Delegation para botões
+      container.addEventListener('click', (e) => {
+        const btn = e.target.closest('button');
+        if (!btn) return;
+        const id = btn.dataset.id;
+        if (typeof id === 'undefined') return;
+        window.location.href = `curso.html?id=${id}`;
+      });
+    });
+  </script>
+</body>
+</html>
+
+

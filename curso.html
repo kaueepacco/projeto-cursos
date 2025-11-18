@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Curso</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="curso-container">
+    <h1 id="curso-title"></h1>
+    <p id="curso-desc"></p>
+
+    <div id="curso-material"></div>
+
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:20px;">
+      <button onclick="window.location.href='index.html'" class="back">← Voltar</button>
+      <button id="quiz-btn">Ir para o Quiz →</button>
+    </div>
+
+    <div id="curso-error" style="color:#fff;margin-top:16px;text-align:center;"></div>
+  </div>
+
+  <script src="data/cursos.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const cursoId = urlParams.get('id');
+
+      const errorDiv = document.getElementById('curso-error');
+
+      if (typeof cursos === 'undefined' || !Array.isArray(cursos)) {
+        errorDiv.textContent = 'Erro ao carregar os cursos. Verifique data/cursos.js';
+        console.error('Variável "cursos" indefinida.');
+        return;
+      }
+
+      if (cursoId === null || typeof cursos[cursoId] === 'undefined') {
+        errorDiv.textContent = 'Curso não encontrado. Volte para a página inicial.';
+        return;
+      }
+
+      const curso = cursos[cursoId];
+      document.getElementById('curso-title').textContent = curso.title || 'Curso';
+      document.getElementById('curso-desc').textContent = curso.description || '';
+
+      const materialDiv = document.getElementById('curso-material');
+      materialDiv.innerHTML = '';
+
+      if (curso.materials && curso.materials.length) {
+        curso.materials.forEach(m => {
+          const block = document.createElement('div');
+          block.className = 'material-item';
+          // Proteção simples: permitir apenas iframes embedd de youtube (string já vem em embed)
+          block.innerHTML = `
+            <h3>${m.title || ''}</h3>
+            <div class="video-wrap">
+              <iframe width="100%" height="315" src="${m.video}" frameborder="0" allowfullscreen></iframe>
+            </div>
+          `;
+          materialDiv.appendChild(block);
+        });
+      } else {
+        materialDiv.innerHTML = "<p>Nenhum material disponível.</p>";
+      }
+
+      document.getElementById('quiz-btn').addEventListener('click', () => {
+        window.location.href = `quiz.html?id=${cursoId}`;
+      });
+    });
+  </script>
+</body>
+</html>
+
+

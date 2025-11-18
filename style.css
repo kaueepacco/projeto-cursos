@@ -1,0 +1,270 @@
+/* ===== Estilo base ===== */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #141e30, #243b55);
+  color: #fff;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+/* ===== Cabeçalhos ===== */
+header {
+  text-align: center;
+  padding: 40px 20px 10px;
+}
+header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+/* ===== Página de cursos ===== */
+.curso-lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.curso-card {
+  background: rgba(255,255,255,0.05);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(6px);
+}
+.curso-card:hover {
+  transform: translateY(-4px);
+  background: rgba(255,255,255,0.1);
+}
+.curso-card button {
+  margin-top: 10px;
+  background: #0078ff;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.3s;
+}
+.curso-card button:hover {
+  background: #005ecc;
+}
+
+/* ===== Container do curso e quiz ===== */
+.curso-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: rgba(255,255,255,0.05);
+  padding: 30px 25px 50px;
+  border-radius: 20px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 30px rgba(0,0,0,0.2);
+}
+.curso-container h1 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* ===== Materiais ===== */
+.material-item {
+  margin: 20px 0;
+}
+.material-item h3 {
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.video-wrap {
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+/* ===== Botões ===== */
+#quiz-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #0078ff;
+  color: #fff;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#quiz-btn:hover {
+  background: #0062cc;
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(0,0,0,0.4);
+}
+
+button {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+button.back {
+  display: inline-block;
+  margin-top: 20px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #ccc;
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+button.back:hover {
+  border-color: #fff;
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+}
+
+/* ===== Barra de progresso em quadrados ===== */
+.progress-grid {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 20px 0 30px;
+}
+.progress-box {
+  width: 18px;
+  height: 18px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+.progress-box.active {
+  background: #ffd900;
+  transform: scale(1.2);
+}
+.progress-box.done {
+  background: #0286dd;
+}
+
+/* ===== Painel de pontuação (acertos e erros) ===== */
+#scoreboard {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0,0,0,0.4);
+  padding: 12px 18px;
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.95rem;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+}
+#scoreboard .score {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+#scoreboard .acertos {
+  color: #00e676;
+}
+#scoreboard .erros {
+  color: #ff5252;
+}
+
+
+/* ===== Questões e respostas ===== */
+#quiz {
+  text-align: center;
+}
+#question {
+  font-size: 1.3rem;
+  margin-bottom: 24px;
+  font-weight: 500;
+}
+
+/* ===== Estilo moderno das respostas ===== */
+#answers {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: stretch;
+}
+.answer-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #fff;
+  font-size: 1rem;
+  padding: 14px 16px;
+  border-radius: 14px;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+.answer-btn:hover {
+  background: rgba(255,255,255,0.15);
+  transform: scale(1.02);
+}
+.answer-btn.correct {
+  background: rgba(0, 200, 83, 0.2);
+  border-color: #00c853;
+  color: #00e676;
+}
+.answer-btn.incorrect {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: #f44336;
+  color: #ff7961;
+}
+
+/* ===== Feedback ===== */
+#feedback {
+  margin-top: 20px;
+  font-size: 1rem;
+  line-height: 1.4;
+  background: rgba(255,255,255,0.08);
+  border-left: 4px solid #0078ff;
+  padding: 15px 20px;
+  border-radius: 10px;
+  text-align: left;
+}
+.hidden {
+  display: none;
+}
+
+/* ===== Botão próxima pergunta ===== */
+#next-btn {
+  margin-top: 24px;
+  background: #0078ff;
+  color: #fff;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background 0.3s, transform 0.2s;
+}
+#next-btn:hover {
+  background: #0062cc;
+  transform: scale(1.03);
+}
+
+/* ===== Responsividade ===== */
+@media (max-width: 600px) {
+  .curso-container {
+    margin: 20px;
+    padding: 20px;
+  }
+  #question {
+    font-size: 1.1rem;
+  }
+  .answer-btn {
+    font-size: 0.95rem;
+  }
+}
