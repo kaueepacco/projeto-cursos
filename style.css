@@ -235,7 +235,7 @@ button.back:hover {
   text-align: left;
 }
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 /* ===== Botão próxima pergunta ===== */

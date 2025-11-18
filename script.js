@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const answersElement = document.getElementById("answers");
   const feedbackElement = document.getElementById("feedback");
   const nextButton = document.getElementById("next-btn");
+  const backButton = document.getElementById("back-btn");
   const cursoTitle = document.getElementById("curso-title");
   const progressGrid = document.getElementById("progress-grid");
 
@@ -33,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let erros = 0;
 
   function startQuiz() {
+    backButton.classList.add('hidden');
     currentQuestionIndex = 0;
     score = 0;
     erros = 0;
@@ -82,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resetState() {
     nextButton.classList.add('hidden');
+    backButton.classList.add('hidden');
     feedbackElement.classList.add('hidden');
     feedbackElement.textContent = '';
     answersElement.innerHTML = '';
@@ -123,6 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
     answersElement.innerHTML = '';
     feedbackElement.textContent = `Você acertou ${score} de ${curso.questions.length} perguntas!`;
     nextButton.classList.add('hidden');
+    backButton.classList.remove('hidden');
     updateScoreboard();
     renderProgress();
   }
