@@ -4,8 +4,8 @@ const cursos = [
     title: "Curso de Cultura Geral",
     description: "Aprenda e teste seus conhecimentos gerais com perguntas explicativas.",
     materials: [
-      { title: "Introdução à Cultura Geral", video: "https://www.youtube.com/embed/f9yQAT1jKjQ" },
-      { title: "Curiosidades sobre o Brasil", video: "https://www.youtube.com/embed/K0qJ8H4KAE4" }
+      { title: "Introdução à Cultura Geral", video: "/materiais/video1.mp4" },
+      { title: "Curiosidades sobre o Brasil", video: "/materiais/video2.mp4" }
     ],
     questions: [
       {

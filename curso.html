@@ -55,7 +55,7 @@
           block.innerHTML = `
             <h3>${m.title || ''}</h3>
             <div class="video-wrap">
-              <iframe width="100%" height="315" src="${m.video}" frameborder="0" allowfullscreen></iframe>
+              <video class="curso-video" src="${m.video}" controls></video>
             </div>
           `;
           materialDiv.appendChild(block);
@@ -64,8 +64,30 @@
         materialDiv.innerHTML = "<p>Nenhum material disponível.</p>";
       }
 
-      document.getElementById('quiz-btn').addEventListener('click', () => {
-        window.location.href = `quiz.html?id=${cursoId}`;
+      const quizBtn = document.getElementById('quiz-btn');
+      quizBtn.disabled = true;
+      quizBtn.classList.add("disabled");
+
+      const videos = document.querySelectorAll(".curso-video");
+      let videosAssistidos = 0;
+
+      videos.forEach(video => {
+        // quando o vídeo termina
+        video.addEventListener("ended", () => {
+          videosAssistidos++;
+
+          if (videosAssistidos === videos.length) {
+            // liberar botão
+            quizBtn.disabled = false;
+            quizBtn.classList.remove("disabled");
+          }
+        });
+      });
+
+      quizBtn.addEventListener('click', () => {
+        if (!quizBtn.disabled) {
+          window.location.href = `quiz.html?id=${cursoId}`;
+          }
       });
     });
   </script>

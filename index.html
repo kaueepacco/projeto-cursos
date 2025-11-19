@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Plataforma de Cursos</title>
+  <title>Treinamento</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <h1>Plataforma de Cursos</h1>
+    <h1>Plataforma de Treinamento</h1>
   </header>
 
   <main class="curso-lista">
@@ -48,7 +48,6 @@
         container.appendChild(card);
       });
 
-      // Delegation para botões
       container.addEventListener('click', (e) => {
         const btn = e.target.closest('button');
         if (!btn) return;
