@@ -3,18 +3,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const cursoId = urlParams.get('id');
   const errorDiv = document.getElementById('quiz-error');
 
-  if (typeof cursos === 'undefined' || !Array.isArray(cursos)) {
+  if (!cursos || !Array.isArray(cursos)) {
     if (errorDiv) errorDiv.textContent = 'Erro: dados dos cursos não encontrados.';
-    console.error('Variável "cursos" indefinida.');
+    console.error('Variável "cursos" indefinida ou inválida.');
     return;
   }
 
-  if (cursoId === null || typeof cursos[cursoId] === 'undefined') {
+  if (!cursoId || typeof cursos[cursoId] === 'undefined') {
     if (errorDiv) errorDiv.textContent = 'Curso não encontrado.';
+    console.error('cursoId inválido:', cursoId);
     return;
   }
 
   const curso = cursos[cursoId];
+  const STORAGE_KEY = `quiz_progress_${cursoId}`;
+
+  // elementos
   const questionElement = document.getElementById("question");
   const answersElement = document.getElementById("answers");
   const feedbackElement = document.getElementById("feedback");
@@ -22,116 +26,216 @@ document.addEventListener('DOMContentLoaded', () => {
   const backButton = document.getElementById("back-btn");
   const cursoTitle = document.getElementById("curso-title");
   const progressGrid = document.getElementById("progress-grid");
-
-  // 🟢 NOVO: elementos do placar
   const acertosEl = document.getElementById("acertos");
   const errosEl = document.getElementById("erros");
+  const retryBtn = document.getElementById("retry-btn");
+  const finishBtn = document.getElementById("finish-btn");
 
-  cursoTitle.textContent = curso.title || 'Curso';
+  if (!curso.questions || !curso.questions.length) {
+    if (errorDiv) errorDiv.textContent = 'Este curso não possui perguntas.';
+    console.error('Sem perguntas no curso:', curso);
+    return;
+  }
 
-  let currentQuestionIndex = 0;
-  let score = 0;
-  let erros = 0;
+  // estado
+  let state = {
+    currentQuestionIndex: 0,
+    score: 0,
+    erros: 0,
+    answered: {},
+    selected: {}
+  };
 
-  function startQuiz() {
-    backButton.classList.add('hidden');
-    currentQuestionIndex = 0;
-    score = 0;
-    erros = 0;
-    updateScoreboard();
-    renderProgress();
-    showQuestion();
+  // carregar salvo
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      Object.assign(state, JSON.parse(saved));
+    } catch (e) {
+      console.warn("Falha ao ler estado salvo:", e);
+    }
+  }
+
+  const totalQuestions = curso.questions.length;
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function resetQuizState() {
+    localStorage.removeItem(STORAGE_KEY);
+    state = {
+      currentQuestionIndex: 0,
+      score: 0,
+      erros: 0,
+      answered: {},
+      selected: {}
+    };
+    saveState();
   }
 
   function updateScoreboard() {
-    acertosEl.textContent = score;
-    errosEl.textContent = erros;
+    acertosEl.textContent = state.score;
+    errosEl.textContent = state.erros;
   }
 
   function renderProgress() {
     progressGrid.innerHTML = '';
-    const total = (curso.questions && curso.questions.length) || 0;
-    for (let i = 0; i < total; i++) {
+    for (let i = 0; i < totalQuestions; i++) {
       const box = document.createElement('div');
       box.className = 'progress-box';
-      if (i < currentQuestionIndex) box.classList.add('done');
-      if (i === currentQuestionIndex) box.classList.add('active');
+      if (i === state.currentQuestionIndex) box.classList.add('active');
+      if (state.answered[i]) box.classList.add('done');
       progressGrid.appendChild(box);
     }
   }
 
+  function resetUI() {
+    answersElement.innerHTML = '';
+    feedbackElement.innerHTML = '';
+    feedbackElement.classList.add('hidden');
+    nextButton.classList.add('hidden');
+    retryBtn.classList.add('hidden');
+  }
+
   function showQuestion() {
-    resetState();
-    const total = curso.questions.length;
-    if (currentQuestionIndex >= total) {
-      endQuiz();
-      return;
-    }
+    resetUI();
+    updateScoreboard();
 
-    const currentQuestion = curso.questions[currentQuestionIndex];
-    questionElement.textContent = currentQuestion.question || '';
+    const current = curso.questions[state.currentQuestionIndex];
+    questionElement.textContent = current.question;
 
-    currentQuestion.answers.forEach(answer => {
-      const button = document.createElement('button');
-      button.textContent = answer.text;
-      button.className = 'answer-btn';
-      button.addEventListener('click', () => selectAnswer(button, answer));
-      answersElement.appendChild(button);
+    current.answers.forEach(a => {
+      const btn = document.createElement('button');
+      btn.className = 'answer-btn';
+      btn.textContent = a.text;
+
+      btn.addEventListener('click', () => selectAnswer(btn, a));
+
+      answersElement.appendChild(btn);
     });
 
     renderProgress();
+
+    if (state.answered[state.currentQuestionIndex]) applyAnsweredState();
   }
 
-  function resetState() {
-    nextButton.classList.add('hidden');
-    backButton.classList.add('hidden');
-    feedbackElement.classList.add('hidden');
-    feedbackElement.textContent = '';
-    answersElement.innerHTML = '';
+  function applyAnsweredState() {
+    const idx = state.currentQuestionIndex;
+    const current = curso.questions[idx];
+    const selectedText = state.selected[idx];
+
+    const correctText = current.answers.find(a => a.correct).text;
+
+    document.querySelectorAll(".answer-btn").forEach(btn => {
+      btn.disabled = true;
+      if (btn.textContent === correctText) btn.classList.add("correct");
+      if (btn.textContent === selectedText && selectedText !== correctText)
+        btn.classList.add("incorrect");
+    });
+
+    feedbackElement.innerHTML = current.comment;
+    feedbackElement.classList.remove("hidden");
+    nextButton.classList.remove("hidden");
   }
 
   function selectAnswer(button, answer) {
-    const currentQuestion = curso.questions[currentQuestionIndex];
-    const allButtons = document.querySelectorAll(".answer-btn");
-    allButtons.forEach(btn => btn.disabled = true);
+    if (state.answered[state.currentQuestionIndex]) return;
+
+    const current = curso.questions[state.currentQuestionIndex];
+    const correctText = current.answers.find(a => a.correct).text;
+
+    document.querySelectorAll(".answer-btn").forEach(b => (b.disabled = true));
+
+    state.selected[state.currentQuestionIndex] = answer.text;
 
     if (answer.correct) {
       button.classList.add("correct");
-      feedbackElement.textContent = "✅ Correto! " + (currentQuestion.comment || '');
-      score++;
+      feedbackElement.textContent = "✅ Correto! " + current.comment;
+      state.score++;
     } else {
       button.classList.add("incorrect");
-      const correctAnswer = currentQuestion.answers.find(a => a.correct)?.text || '—';
-      feedbackElement.textContent = `❌ Errado! A resposta certa é: ${correctAnswer}. ${currentQuestion.comment || ''}`;
-      erros++;
+      feedbackElement.textContent =
+        `❌ Errado! A resposta correta é: ${correctText}. ` + current.comment;
+      state.erros++;
     }
 
-    feedbackElement.classList.remove('hidden');
-    nextButton.classList.remove('hidden');
+    state.answered[state.currentQuestionIndex] = true;
+
+    feedbackElement.classList.remove("hidden");
+    nextButton.classList.remove("hidden");
+
     updateScoreboard();
+    saveState();
     renderProgress();
   }
 
-  nextButton.addEventListener('click', () => {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < curso.questions.length) {
-      showQuestion();
-    } else {
+  nextButton.addEventListener("click", () => {
+    state.currentQuestionIndex++;
+    if (state.currentQuestionIndex >= totalQuestions) {
       endQuiz();
+      return;
     }
+    saveState();
+    showQuestion();
   });
 
   function endQuiz() {
-    questionElement.textContent = '🎓 Fim do Quiz!';
-    answersElement.innerHTML = '';
-    feedbackElement.textContent = `Você acertou ${score} de ${curso.questions.length} perguntas!`;
-    nextButton.classList.add('hidden');
-    backButton.classList.remove('hidden');
+    const total = totalQuestions;
+    const metade = total / 2;
+
+    questionElement.textContent = "🎓 Fim do Quiz!";
+    answersElement.innerHTML = "";
+
+    let message = `Você acertou ${state.score} de ${total} perguntas!`;
+
+    let desempenhoMsg = "";
+    if (state.score >= metade) {
+      desempenhoMsg = "👏 Excelente! Você acertou mais da metade das perguntas.";
+    } else {
+      desempenhoMsg =
+        "⚠️ Você acertou menos da metade. Recomendamos revisar o conteúdo e tentar novamente.";
+    }
+
+    feedbackElement.innerHTML = `
+      <p>${message}</p>
+      <p style="margin-top:10px;font-weight:bold;">${desempenhoMsg}</p>
+    `;
+    feedbackElement.classList.remove("hidden");
+
+    nextButton.classList.add("hidden");
+
+    // botão refazer aparece apenas se errou maioria
+    if (state.score < metade) {
+      retryBtn.classList.remove("hidden");
+    }
+
+    if (state.score >= metade) {
+      finishBtn.classList.remove("hidden");
+    }
+
     updateScoreboard();
     renderProgress();
   }
 
-  startQuiz();
+  retryBtn.addEventListener("click", () => {
+    resetQuizState();
+    window.location.href = `curso.html?id=${cursoId}`;
+  });
+
+  finishBtn.addEventListener("click", () => {
+    resetQuizState();
+    window.location.href = `curso.html?id=${cursoId}`;
+  });
+
+  // inicialização
+  updateScoreboard();
+  renderProgress();
+  showQuestion();
 });
+
+
+
+
 
 

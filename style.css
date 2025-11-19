@@ -91,6 +91,48 @@ video {
 }
 
 /* ===== Botões ===== */
+#finish-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #0078ff;
+  color: #fff;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#finish-btn:hover {
+  background: #0062cc;
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(0,0,0,0.4);
+}
+
+#retry-btn {
+  display: inline-block;
+  margin-top: 20px;
+  background: #0078ff;
+  color: #fff;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+
+#retry-btn:hover {
+  background: #0062cc;
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(0,0,0,0.4);
+}
+
 #quiz-btn {
   display: inline-block;
   margin-top: 20px;
