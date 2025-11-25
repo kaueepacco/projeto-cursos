@@ -32,15 +32,49 @@
   <script src="data/cursos.js"></script>
   <script src="script.js"></script>
   <script>
-    // Garante que o botão voltar volte para o curso correto
     document.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const id = urlParams.get('id');
-      const backBtn = document.getElementById('back-btn');
-      backBtn.addEventListener('click', () => {
-        window.location.href = `curso.html?id=${id}`;
-      });
+  const urlParams = new URLSearchParams(window.location.search);
+  const id = urlParams.get('id');
+  const videoProgressKey = `curso_${id}_videos_progress`;
+
+  const backBtn = document.getElementById('back-btn');
+  const finishBtn = document.getElementById("finish-btn");
+  const retryBtn = document.getElementById("retry-btn");
+
+  // Botão VOLTAR (só aparece no fim do quiz)
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      try {
+        localStorage.removeItem(videoProgressKey);
+      } catch (e) { console.error(e); }
+
+      window.location.href = `curso.html?id=${id}`;
     });
+  }
+
+  // Botão FINALIZAR QUIZ
+  if (finishBtn) {
+    finishBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(videoProgressKey);
+      } catch(e) { console.error(e); }
+
+      window.location.href = `curso.html?id=${id}`;
+    });
+  }
+
+  // Botão REFAZER QUIZ
+  if (retryBtn) {
+    retryBtn.addEventListener("click", () => {
+      try {
+        localStorage.removeItem(videoProgressKey);
+      } catch (e) { console.error(e); }
+
+      window.location.href = `curso.html?id=${id}`;
+    });
+  }
+});
+
   </script>
 </body>
 </html>

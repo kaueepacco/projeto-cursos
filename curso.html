@@ -26,17 +26,16 @@
     document.addEventListener('DOMContentLoaded', () => {
       const urlParams = new URLSearchParams(window.location.search);
       const cursoId = urlParams.get('id');
-
       const errorDiv = document.getElementById('curso-error');
 
       if (typeof cursos === 'undefined' || !Array.isArray(cursos)) {
-        errorDiv.textContent = 'Erro ao carregar os cursos. Verifique data/cursos.js';
+        if (errorDiv) errorDiv.textContent = 'Erro ao carregar os cursos. Verifique data/cursos.js';
         console.error('Variável "cursos" indefinida.');
         return;
       }
 
       if (cursoId === null || typeof cursos[cursoId] === 'undefined') {
-        errorDiv.textContent = 'Curso não encontrado. Volte para a página inicial.';
+        if (errorDiv) errorDiv.textContent = 'Curso não encontrado. Volte para a página inicial.';
         return;
       }
 
@@ -47,15 +46,15 @@
       const materialDiv = document.getElementById('curso-material');
       materialDiv.innerHTML = '';
 
+      // --- renderiza vídeos (sem alteração visual do resto) ---
       if (curso.materials && curso.materials.length) {
-        curso.materials.forEach(m => {
+        curso.materials.forEach((m, idx) => {
           const block = document.createElement('div');
           block.className = 'material-item';
-          // Proteção simples: permitir apenas iframes embedd de youtube (string já vem em embed)
           block.innerHTML = `
             <h3>${m.title || ''}</h3>
             <div class="video-wrap">
-              <video class="curso-video" src="${m.video}" controls></video>
+              <video class="curso-video" data-vid-index="${idx}" src="${m.video}" controls></video>
             </div>
           `;
           materialDiv.appendChild(block);
@@ -64,30 +63,84 @@
         materialDiv.innerHTML = "<p>Nenhum material disponível.</p>";
       }
 
+      // --- PROGRESSO SALVO: chave por curso ---
+      const progressoKey = `curso_${cursoId}_videos_progress`;
+      let progresso = JSON.parse(localStorage.getItem(progressoKey) || "null");
+      const videos = Array.from(document.querySelectorAll('.curso-video'));
+
+      // init progresso array se necessário
+      if (!Array.isArray(progresso) || progresso.length !== videos.length) {
+        progresso = videos.map(() => ({ currentTime: 0, ended: false }));
+        // not saving immediately, save only on first change
+      }
+
+      // atualiza contador inicial
+      let videosAssistidos = progresso.filter(p => p.ended).length;
+
       const quizBtn = document.getElementById('quiz-btn');
-      quizBtn.disabled = true;
-      quizBtn.classList.add("disabled");
+      function tryUnlockQuiz() {
+        if (videosAssistidos === videos.length && videos.length > 0) {
+          quizBtn.disabled = false;
+          quizBtn.classList.remove('disabled');
+        }
+      }
 
-      const videos = document.querySelectorAll(".curso-video");
-      let videosAssistidos = 0;
+      // Aplica progresso salvo e registra listeners
+      videos.forEach((video, index) => {
+        const saved = progresso[index] || { currentTime: 0, ended: false };
 
-      videos.forEach(video => {
-        // quando o vídeo termina
-        video.addEventListener("ended", () => {
-          videosAssistidos++;
+        // restaura tempo (se houver)
+        try {
+          if (saved.currentTime && !isNaN(saved.currentTime) && saved.currentTime > 0 && saved.currentTime < (video.duration || Infinity)) {
+            // colocar em setTimeout para garantir que o video metadata esteja carregado
+            video.addEventListener('loadedmetadata', () => {
+              // só setar se for menor que duration
+              if (saved.currentTime < video.duration) video.currentTime = saved.currentTime;
+            });
+          }
+        } catch (e) { /* ignore */ }
 
-          if (videosAssistidos === videos.length) {
-            // liberar botão
-            quizBtn.disabled = false;
-            quizBtn.classList.remove("disabled");
+        // marca visualmente se já finalizado
+        if (saved.ended) {
+          video.classList.add('finished'); // podes estilizar .finished se quiser
+        }
+
+        // timeupdate -> salva tempo atual (com throttle simples)
+        let lastSaveAt = 0;
+        video.addEventListener('timeupdate', () => {
+          const now = Date.now();
+          if (now - lastSaveAt < 1000) return; // salva no máximo 1x por segundo
+          lastSaveAt = now;
+
+          progresso[index] = progresso[index] || {};
+          progresso[index].currentTime = video.currentTime;
+          // não tocar ended aqui
+          try { localStorage.setItem(progressoKey, JSON.stringify(progresso)); } catch(e){ console.error(e); }
+        });
+
+        // ended -> marca concluído e salva
+        video.addEventListener('ended', () => {
+          if (!progresso[index] || !progresso[index].ended) {
+            progresso[index] = progresso[index] || {};
+            progresso[index].ended = true;
+            progresso[index].currentTime = video.duration || 0;
+            try { localStorage.setItem(progressoKey, JSON.stringify(progresso)); } catch(e){ console.error(e); }
+            video.classList.add('finished');
+            videosAssistidos++;
+            tryUnlockQuiz();
           }
         });
       });
 
+      // Bloqueia botão por padrão e tenta liberar se já assistidos
+      quizBtn.disabled = true;
+      quizBtn.classList.add('disabled');
+      tryUnlockQuiz();
+
       quizBtn.addEventListener('click', () => {
         if (!quizBtn.disabled) {
           window.location.href = `quiz.html?id=${cursoId}`;
-          }
+        }
       });
     });
   </script>
