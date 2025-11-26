@@ -46,7 +46,6 @@
       const materialDiv = document.getElementById('curso-material');
       materialDiv.innerHTML = '';
 
-      // --- renderiza vídeos (sem alteração visual do resto) ---
       if (curso.materials && curso.materials.length) {
         curso.materials.forEach((m, idx) => {
           const block = document.createElement('div');
@@ -68,10 +67,8 @@
       let progresso = JSON.parse(localStorage.getItem(progressoKey) || "null");
       const videos = Array.from(document.querySelectorAll('.curso-video'));
 
-      // init progresso array se necessário
       if (!Array.isArray(progresso) || progresso.length !== videos.length) {
         progresso = videos.map(() => ({ currentTime: 0, ended: false }));
-        // not saving immediately, save only on first change
       }
 
       // atualiza contador inicial
@@ -92,15 +89,12 @@
         // restaura tempo (se houver)
         try {
           if (saved.currentTime && !isNaN(saved.currentTime) && saved.currentTime > 0 && saved.currentTime < (video.duration || Infinity)) {
-            // colocar em setTimeout para garantir que o video metadata esteja carregado
             video.addEventListener('loadedmetadata', () => {
-              // só setar se for menor que duration
               if (saved.currentTime < video.duration) video.currentTime = saved.currentTime;
             });
           }
-        } catch (e) { /* ignore */ }
+        } catch (e) {  }
 
-        // marca visualmente se já finalizado
         if (saved.ended) {
           video.classList.add('finished'); // podes estilizar .finished se quiser
         }
@@ -109,12 +103,11 @@
         let lastSaveAt = 0;
         video.addEventListener('timeupdate', () => {
           const now = Date.now();
-          if (now - lastSaveAt < 1000) return; // salva no máximo 1x por segundo
+          if (now - lastSaveAt < 1000) return;
           lastSaveAt = now;
 
           progresso[index] = progresso[index] || {};
           progresso[index].currentTime = video.currentTime;
-          // não tocar ended aqui
           try { localStorage.setItem(progressoKey, JSON.stringify(progresso)); } catch(e){ console.error(e); }
         });
 
